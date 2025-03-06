@@ -20,12 +20,11 @@ const bookingSchema = new Schema(
     },
     bookingDate: {
       type: Date,
-      default: Date.now,
     },
     seatsBooked: {
       type: Number,
       required: true,
-      min: 1,
+      min: 1, 
     },
     /* totalPrice: {
         type: Number,  // If you want to calculate ride fare

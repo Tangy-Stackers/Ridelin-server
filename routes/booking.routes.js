@@ -37,6 +37,7 @@ router.post("/book", (req, res, next) => {
       res.status(500).json({ message: "Server error" });
     });
 });
+
 //GET/book-----> get all the booking
 router.get("/bookings", (req, res, next) => {
   Booking.find({})
@@ -50,7 +51,7 @@ router.get("/bookings", (req, res, next) => {
     });
 });
 // GET/bookingId------> get a specific booking by ID
-router.get("/:bookingId", (req, res) => {
+router.get("/bookings/:bookingId", (req, res) => {
   const { bookingId } = req.params;
   Booking.findById(bookingId)
     .populate("ride")
@@ -63,7 +64,7 @@ router.get("/:bookingId", (req, res) => {
     });
 });
 // PATCH/bookingId-------> Update booking (e.g., update seatsBooked)
-router.patch("/:bookingId", (req, res) => {
+router.patch("/bookings/:bookingId", (req, res) => {
   const { bookingId } = req.params;
   const { seatsBooked, status } = req.body;
 
@@ -93,12 +94,10 @@ router.patch("/:bookingId", (req, res) => {
       });
     })
     .then((updatedBooking) => {
-      res
-        .status(200)
-        .json({
-          message: "Booking updated successfully",
-          booking: updatedBooking,
-        });
+      res.status(200).json({
+        message: "Booking updated successfully",
+        booking: updatedBooking,
+      });
     })
     .catch((error) => {
       console.error(error);
@@ -107,20 +106,22 @@ router.patch("/:bookingId", (req, res) => {
 });
 
 // DELETE/bookingId---------->Cancel booking
-router.delete("/:bookingId", async (req, res) => {
+router.delete("/bookings/:bookingId", async (req, res) => {
   const { bookingId } = req.params;
 
-    if (!bookingId) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-     Booking.findByIdAndDelete(bookingId)
-.then(() => {
-  res.status(200).json({message: `Booking with ${bookingId} deleted successfully`})
-})   
- .catch ((error) => {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  });
+  if (!bookingId) {
+    return res.status(404).json({ message: "Booking not found" });
+  }
+  Booking.findByIdAndDelete(bookingId)
+    .then(() => {
+      res
+        .status(200)
+        .json({ message: `Booking with ${bookingId} deleted successfully` });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    });
 });
 
 module.exports = router;

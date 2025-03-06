@@ -20,6 +20,9 @@ const rideSchema = new Schema({
         required: true,
         min: 0,
       },
+      travelDate: {type: Date},
+      StartTime: { type: String },
+      EndTime:{type: String},
       driverId: {
         type: Schema.Types.ObjectId,
         ref: "User",

@@ -14,9 +14,14 @@ require("./db");
 // ℹ️ This function is getting exported from the config folder. It runs most pieces of middleware
 require("./config")(app);
 
+
 // 👇 Start handling routes here
 const indexRoutes = require("./routes/index.routes");
 app.use("/api", indexRoutes);
+
+// user route
+const userRoutes = require("./routes/user.routes")
+app.use("/api/user",userRoutes);
 
 const rideRoutes = require("./routes/ride.routes");
 app.use("/api/ride", rideRoutes);

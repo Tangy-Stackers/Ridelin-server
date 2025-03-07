@@ -44,7 +44,7 @@ router.get("/:rideId",isAuthenticated,(req,res,next)=>{
         });
 });
 
-// DELETE  /api/projects/:rideId  -  Deletes a specific ride by id
+// DELETE  /api/ride/:rideId  -  Deletes a specific ride by id
 router.delete("/:rideId", isAuthenticated, (req, res, next) => {
     const { rideId } = req.params;
   

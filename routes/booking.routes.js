@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const User = require("../models/User.model");
 const Ride = require("../models/Ride.model");
@@ -38,9 +39,30 @@ router.post("/book", (req, res, next) => {
     });
 });
 
+// router.post("/book", async (req, res) => {
+//   try {
+//     const {passengerId, ride} = req.body
+
+//     const foundRide = await Ride.findById(ride)
+//     const rider = await User.findById(passengerId)
+
+//     if(!foundRide || ride.driverId === passengerId){
+//       return res.status(500).json({msg: "Ride not found or driver cant be passenger"})
+//     }
+
+//     const createdBooking = await Booking.create({...req.body, bookingDate: foundRide.travelDate})
+
+//     return res.status(201).json(createdBooking)
+//   } catch (error) {
+//     console.log(error)
+//     return res.status(500).json(error)
+//   }
+// })
+
 //GET/book-----> get all the booking
 router.get("/bookings", (req, res, next) => {
   Booking.find({})
+ 
     .populate("ride")
     .then((booking) => {
       res.status(200).json(booking);
@@ -52,10 +74,19 @@ router.get("/bookings", (req, res, next) => {
 });
 // GET/bookingId------> get a specific booking by ID
 router.get("/bookings/:bookingId", (req, res) => {
+
   const { bookingId } = req.params;
+  console.log("bookingid::", bookingId);
+
+  if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+    return res.status(400).json({ error: "Invalid booking ID format" });
+  }
   Booking.findById(bookingId)
     .populate("ride")
     .then((booking) => {
+      if (!booking) {
+        return res.status(404).json({ error: "Booking not found" });
+      }
       res.status(200).json(booking);
     })
     .catch((error) => {
@@ -66,7 +97,11 @@ router.get("/bookings/:bookingId", (req, res) => {
 // PATCH/bookingId-------> Update booking (e.g., update seatsBooked)
 router.patch("/bookings/:bookingId", (req, res) => {
   const { bookingId } = req.params;
-  const { seatsBooked, status } = req.body;
+  const { seatsBooked, status, bookingDate } = req.body;
+
+  if (bookingDate && isNaN(Date.parse(bookingDate))) {
+    return res.status(400).json({ message: "Invalid bookingDate format" });
+  }
 
   Booking.findById(bookingId)
     .then((booking) => {
@@ -80,13 +115,13 @@ router.patch("/bookings/:bookingId", (req, res) => {
             .status(400)
             .json({ message: "Not enough seats available" });
         }
-        // Update the number of seats booked
-        const seatDifference = seatsBooked - booking.seatsBooked;
+      
         // Update the booking with new seatsBooked and status if provided
         return Booking.findByIdAndUpdate(
           bookingId,
           {
             seatsBooked,
+            ...(bookingDate && { bookingDate }),
             status: status !== undefined ? status : booking.status,
           },
           { new: true }
@@ -94,10 +129,7 @@ router.patch("/bookings/:bookingId", (req, res) => {
       });
     })
     .then((updatedBooking) => {
-      res.status(200).json({
-        message: "Booking updated successfully",
-        booking: updatedBooking,
-      });
+      res.status(200).json({message: "Booking updated successfully",booking: updatedBooking,});
     })
     .catch((error) => {
       console.error(error);
@@ -106,17 +138,20 @@ router.patch("/bookings/:bookingId", (req, res) => {
 });
 
 // DELETE/bookingId---------->Cancel booking
-router.delete("/bookings/:bookingId", async (req, res) => {
+router.delete("/bookings/:bookingId", (req, res) => {
   const { bookingId } = req.params;
-
-  if (!bookingId) {
-    return res.status(404).json({ message: "Booking not found" });
+  console.log("bookingid------------", bookingId);
+  if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+    return res.status(400).json({ message: "Invalid booking ID format" });
   }
+
   Booking.findByIdAndDelete(bookingId)
-    .then(() => {
-      res
-        .status(200)
-        .json({ message: `Booking with ${bookingId} deleted successfully` });
+    .then((booking) => {
+      console.log("......",booking._id);
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      res.status(200).json({ message: `Booking with ${bookingId} deleted successfully` });
     })
     .catch((error) => {
       console.error(error);

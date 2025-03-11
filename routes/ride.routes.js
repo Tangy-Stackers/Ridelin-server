@@ -34,6 +34,7 @@ router.get("/",isAuthenticated,(req,res,next)=>{
 router.get("/:rideId",isAuthenticated,(req,res,next)=>{
     const { rideId } = req.params;
     Ride.findById(rideId)
+    .populate("driverId","name email phone")
         .then((rides)=>{
             if(rides === null){res.status(404).json({ message: "Ride not Found" })}
             else{res.json(rides)}

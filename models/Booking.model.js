@@ -3,15 +3,13 @@ const { Schema, model } = mongoose;
 
 const bookingSchema = new Schema(
   {
-    passengerId: {
+    passenger: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     ride: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Ride",
-      required: true,
     },
     status: {
       type: String,
@@ -24,7 +22,7 @@ const bookingSchema = new Schema(
     seatsBooked: {
       type: Number,
       required: true,
-      min: 1, 
+      min: 1,
     },
     /* totalPrice: {
         type: Number,  // If you want to calculate ride fare
@@ -34,4 +32,4 @@ const bookingSchema = new Schema(
   { timestamps: true }
 );
 
-  module.exports = model("Booking", bookingSchema);
+module.exports = model("Booking", bookingSchema);

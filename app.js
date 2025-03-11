@@ -16,19 +16,12 @@ require("./config")(app);
 
 
 // 👇 Start handling routes here
-const indexRoutes = require("./routes/index.routes");
-app.use("/api", indexRoutes);
+app.use("/api", require("./routes/index.routes"));
 
 // user route
-const userRoutes = require("./routes/user.routes")
-app.use("/api/user",userRoutes);
-
-const rideRoutes = require("./routes/ride.routes");
-app.use("/api/ride", rideRoutes);
-
-const authRoutes = require("./routes/auth.routes");
-app.use("/auth", authRoutes);
-
+app.use("/api/user",require("./routes/user.routes"));
+app.use("/api/ride", require("./routes/ride.routes"));
+app.use("/auth", require("./routes/auth.routes"));
 app.use("/api", require("./routes/booking.routes"));
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);

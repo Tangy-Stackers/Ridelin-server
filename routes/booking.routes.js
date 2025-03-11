@@ -4,38 +4,40 @@ const router = express.Router();
 const User = require("../models/User.model");
 const Ride = require("../models/Ride.model");
 const Booking = require("../models/Booking.model");
+const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 // POST/book----> create a booking
-router.post("/book", (req, res, next) => {
+router.post("/book", isAuthenticated, (req, res) => {
   //const { rideId, userId} = req.params;
   const newBooking = req.body;
   console.log(newBooking);
-  const { ride, passengerId } = newBooking;
+  const { ride, userId } = newBooking;
 
   Ride.findById(ride)
     .then((ride) => {
+      console.log("ride is", ride);
       if (!ride) {
         return res.status(400).json({ message: "Ride not found" });
+      } else {
+        User.findById(userId).then((pass) => {
+          if (!pass) {
+            return res.status(402).json({ message: "Passenger not found" });
+          }
+          if (Ride.driverId === userId) {
+            return res
+              .status(400)
+              .json({ message: "Passenger cannot be the rider" });
+          }
+          return Booking.create(newBooking);
+        });
       }
-      return User.findById(passengerId);
-    })
-    .then((passenger) => {
-      if (!passenger) {
-        return res.status(402).json({ message: "Passenger not found" });
-      }
-      if (Ride.driverId === passengerId) {
-        return res
-          .status(400)
-          .json({ message: "Passenger cannot be the rider" });
-      }
-      return Booking.create(newBooking);
     })
     .then(() => {
-      res.status(201).json({ message: "Ride booked successfully" });
+      return res.status(201).json({ message: "Ride booked successfully" });
     })
     .catch((error) => {
       console.error(error);
-      res.status(500).json({ message: "Server error" });
+      return res.status(500).json({ message: "Server error" });
     });
 });
 
@@ -62,7 +64,7 @@ router.post("/book", (req, res, next) => {
 //GET/book-----> get all the booking
 router.get("/bookings", (req, res, next) => {
   Booking.find({})
- 
+
     .populate("ride")
     .then((booking) => {
       res.status(200).json(booking);
@@ -74,7 +76,6 @@ router.get("/bookings", (req, res, next) => {
 });
 // GET/bookingId------> get a specific booking by ID
 router.get("/bookings/:bookingId", (req, res) => {
-
   const { bookingId } = req.params;
   console.log("bookingid::", bookingId);
 
@@ -95,7 +96,7 @@ router.get("/bookings/:bookingId", (req, res) => {
     });
 });
 // PATCH/bookingId-------> Update booking (e.g., update seatsBooked)
-router.patch("/bookings/:bookingId", (req, res) => {
+router.patch("/bookings/:bookingId", isAuthenticated, (req, res) => {
   const { bookingId } = req.params;
   const { seatsBooked, status, bookingDate } = req.body;
 
@@ -115,7 +116,7 @@ router.patch("/bookings/:bookingId", (req, res) => {
             .status(400)
             .json({ message: "Not enough seats available" });
         }
-      
+
         // Update the booking with new seatsBooked and status if provided
         return Booking.findByIdAndUpdate(
           bookingId,
@@ -129,7 +130,12 @@ router.patch("/bookings/:bookingId", (req, res) => {
       });
     })
     .then((updatedBooking) => {
-      res.status(200).json({message: "Booking updated successfully",booking: updatedBooking,});
+      res
+        .status(200)
+        .json({
+          message: "Booking updated successfully",
+          booking: updatedBooking,
+        });
     })
     .catch((error) => {
       console.error(error);
@@ -138,7 +144,7 @@ router.patch("/bookings/:bookingId", (req, res) => {
 });
 
 // DELETE/bookingId---------->Cancel booking
-router.delete("/bookings/:bookingId", (req, res) => {
+router.delete("/bookings/:bookingId", isAuthenticated, (req, res) => {
   const { bookingId } = req.params;
   console.log("bookingid------------", bookingId);
   if (!mongoose.Types.ObjectId.isValid(bookingId)) {
@@ -147,11 +153,13 @@ router.delete("/bookings/:bookingId", (req, res) => {
 
   Booking.findByIdAndDelete(bookingId)
     .then((booking) => {
-      console.log("......",booking._id);
+      console.log("......", booking._id);
       if (!booking) {
         return res.status(404).json({ message: "Booking not found" });
       }
-      res.status(200).json({ message: `Booking with ${bookingId} deleted successfully` });
+      res
+        .status(200)
+        .json({ message: `Booking with ${bookingId} deleted successfully` });
     })
     .catch((error) => {
       console.error(error);

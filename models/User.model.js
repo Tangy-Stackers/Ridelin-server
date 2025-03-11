@@ -23,7 +23,7 @@ const userSchema = new Schema(
     },
     phone :{
       type: String,
-      required:[true, "Phone Number is required."],
+      required:[false, "Phone Number is required."],
       unique: true,
       trim: true,
       match: [/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"],

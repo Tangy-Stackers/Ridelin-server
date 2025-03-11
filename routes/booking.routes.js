@@ -62,7 +62,7 @@ router.post("/book", isAuthenticated, (req, res) => {
 // })
 
 //GET/book-----> get all the booking
-router.get("/bookings", (req, res, next) => {
+router.get("/bookings", isAuthenticated,(req, res, next) => {
   Booking.find({})
 
     .populate("ride")
@@ -75,7 +75,7 @@ router.get("/bookings", (req, res, next) => {
     });
 });
 // GET/bookingId------> get a specific booking by ID
-router.get("/bookings/:bookingId", (req, res) => {
+router.get("/bookings/:bookingId", isAuthenticated, (req, res) => {
   const { bookingId } = req.params;
   console.log("bookingid::", bookingId);
 

@@ -21,15 +21,21 @@ const rideSchema = new Schema(
       required: true,
       min: 0,
     },
-    travelDate: { type: String },
+    travelDate: { type: Date },
     startTime: { type: String },
     endTime: { type: String },
-    distance: {type: String},
+    distance: { type: String },
     driverId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    vehicle: { type: String },
+    licensePlate: { type: String },
+    music: { type: Boolean, default: false },
+    smokingAllowed: { type: Boolean, default: false },
+    petsAllowed: { type: Boolean, default: false },
+    waypoints: [{ type: String }],
   },
   { timestamps: true }
 );

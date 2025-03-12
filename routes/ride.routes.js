@@ -8,9 +8,9 @@ const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 //  POST /api/ride  -  Creates a new ride
 router.post("/", (req, res, next) => {
-  const { origin, destination, seatsAvailable, price, driverId } = req.body;
+  const { origin, destination, seatsAvailable, price, driverId,travelDate,startTime,endTime,distance,vehicle,licensePlate,music,smokingAllowed,petsAllowed, waypoints} = req.body;
 
-  Ride.create({  origin, destination, seatsAvailable, price, driverId })
+  Ride.create({  origin, destination, seatsAvailable, price, driverId,travelDate,startTime,endTime,distance,vehicle,licensePlate,music,smokingAllowed,petsAllowed, waypoints })
 
     .then((response) => res.json(response))
     .catch((err) => {
